@@ -1,0 +1,445 @@
+【FROM 為你自己學 Git https://gitbook.tw/】
+
+git init 建立數據庫
+
+git init --bare 建立所有 Git 儲存庫的相關檔案與資料夾
+沒有工作目錄的純儲存庫，叫做「裸儲存庫」 (bare repository)
+
+git clone [REPO_URI] 指令「複製」(clone) 一份回來
+把所有 Git 儲存庫中的所有版本紀錄、所有版本的檔案、... 等等，所有資料全部複製回來
+
+git config --local -l 查看local設定檔內容
+
+【狀態】
+git status 觀看檔案狀態
+git status -s 顯示較為精簡的版本
+
+【從工作目錄移至暫存區（索引）(staging area)】
+git add aa.txt 移至暫存區
+git add . 全部移至暫存區（索引當下這個目錄，以及它的子孫目錄）
+git add --all 全部移至暫存區（專案內的所有異動）
+
+【（從暫存區）提交到儲存庫（Repository）裡存檔】
+git commit -m "填寫版本紀錄的說明文字"
+git commit --allow-empty -m "提交空的commit" 沒東西也是可以 Commit
+
+【-a：直接 add 且 commit】
+git commit -a -m "註釋說明" 對已經存在 Repository 的檔案才有效
+所以 Untracked file 無效
+
+【-p：區塊(hunk)加到暫存區(staging area)】
+git add --patch index.html
+git add -p index.html
+Stage this hunk [y,n,q,a,d,/,s,e,?]? 問號查看各縮寫代表的意思
+
+【查詢歷史紀錄】
+git log 觀看歷史紀錄
+git log welcome.html 檢視單一檔案的紀錄
+git log -p welcome.html 每次的 Commit 做了什麼修改
+git log -10 透過一個減號與一個數字，限定輸出最近幾筆
+git log --oneline
+git log --oneline --graph
+git log --oneline --author="Sherly" 查詢作者為 Sherly 的 Commit
+git log --oneline --grep="0420" 搜尋符合字樣的 Commit 訊息
+git log -S "sth" 搜尋在所有 Commit 的檔案中，哪些符合特定條件的
+git log --since="9am" --until="12am" 今天時間之間所有的 Commit
+git log --after="2024-04-24" 從2024年4月24之後的
+【Reflog】預設會保留 30 天
+git reflog 當 HEAD 有移動的時候，Git 就會在 Reflog 裡記上一筆
+等於 git log -g --oneline 加上 -g 參數，也可以看到 Reflog
+
+
+
+【某一行是誰寫的】
+git blame index.html
+git blame -L 5,10 index.html 只顯示指定行數，第5~10行的資訊
+
+【rm（刪除）】
+git rm hello.txt 實體檔案刪除，且自動加入暫存區
+git rm hello.txt --cached 不想讓這個檔案再被 Git 控管了，實體檔案未刪除
+從 tracked 變成 Untracked 了，或按右鍵選擇「Stop Tracking」
+git checkout hello.txt 把hello.txt救回來，把檔案從 .git 目錄裡拉一份到目前的工作目錄
+這個指令會把暫存區（Staging Area）裡的內容或檔案，拿來覆蓋工作目錄（Working Directory）的內容或檔案
+git checkout HEAD~2 hello.txt 拿距離現在兩個版本以前的那個hello.txt檔案，來覆蓋現在的工作目錄裡的hello.txt檔案
+這同時也會更新暫存區的狀態(Changes to be committed)
+
+【mv（變更檔名）】
+git mv kk.py kk2.py 重新命名，且自動加入暫存區
+雖然只是改檔名，但對 Git 來說會被認為是兩個動作
+更改檔名的時候，Git 並沒有為此做出一個新的 Blob 物件，而僅是指向原來舊的那顆 Blob 物件。
+但因為檔名變了，所以會為此做出一顆新的 Tree 物件喔。
+
+【reset 前往之前狀態】
+git reset --hard cb8641 前往該版號
+git reset 85e7e30 切換到 85e7e30 這個 Commit 的狀態
+git reset 重置目前工作目錄的索引狀態
+git reset HEAD^ 拆掉最後一次的 Commit，每一個 ^ 符號表示「前一次」的意思，可以用 @ 來代替 HEAD
+git reset HEAD~3 拆掉最後三次的 Commit，前往三個 Commit 之前的狀態
+git reset HEAD^^ 拆掉最後兩次的 Commit，前往兩個 Commit 之前的狀態
+--mixed （預設）把暫存區的檔案丟掉
+--soft 工作目錄跟暫存區的檔案都不會被丟掉
+--hard 工作目錄以及暫存區的檔案都會丟掉
+Commit 拆出來的那些檔案何去何從：
+--mixed （預設）丟回工作目錄
+--soft 丟回暫存區
+--hard 直接丟掉
+
+
+
+【分支】：分支只是一個指向某個 Commit 的貼紙，會隨著 Commit 而移動
+git branch 顯示分支
+git branch cat 新增了一個 cat 分支
+git branch -m master slave 改分支名字，把 master 改成 slave
+git checkout cat 切換分支到 cat 分支
+git checkout -b cat 如果分支不存在，新建並切換過去
+git branch -d dog 刪除dog分支，還沒被完全合併的分支刪不掉
+git branch -D cat 可以強制把還沒合併的分支砍掉
+刪掉分支，那些 Commit 還是在，
+只是如果沒記下那些 Commit 的 SHA-1 值，不容易再拿來利用
+git branch new_cat b174a5a 建新的分支叫new_cat ，讓它指向 b174a5a 這個 Commit
+git branch -b new_cat b174a5a 同上並直接切換過去
+分支記錄在.git/refs/heads/
+cat .git/HEAD 看 HEAD 目前正指向著哪一分支：refs/heads/cat
+cat .git/refs/heads/master 可看到 master 分支的尾巴版本號
+【合併分支】：合併（分支指向的那個）Commit
+git merge cat 把 cat 分支合併進來
+快轉模式（Fast Forward）：把 master 這張貼紙撕起來，然後往前貼
+git merge cat --no-ff  參數--no-ff是「不要使用快轉模式合併」，額外做出一個 Commit 物件
+好處是可以完整保留分支的樣子，但也沒必要。
+同時都加了一張叫做 cute.jpg 的圖片，合併的時候出現衝突：
+git checkout --ours cute.jpg 用現在所處分支的檔案
+git checkout --theirs cute.jpg 用對方分支的檔案
+
+【rebase】：重新定義分支的參考基準，不會產生額外的合併專用的 Commit
+git rebase dog 將使用 dog 分支當做我新的參考基準
+Applying：
+因為cat要接到dog上，所以需要根據dog的最後一個Commit，重新計算新的 SHA-1 值，做出一顆新的 Commit 物件
+原本在cat後面的commit用同方法接下去。
+原本cat舊的commit沒有馬上被刪除，會慢慢被邊緣化，直到 Git 的資源回收。
+誰 Rebase 誰沒什麼差別，但會造成歷史紀錄上先後順序不同的差別。
+git reset b174a5a --hard 用 reset 指令硬切回去做 Rebase 前的最後動作
+git reset ORIG_HEAD --hard 退回 reset 之前的狀態
+【ORIG_HEAD】在.git/ORIG_HEAD
+當你在做一些比較「危險」的操作（例如像 merge、rebase 或 reset 之類的），
+Git 就會把 HEAD 的狀態存放在這裡，讓你隨時可以跳回危險動作之前的狀態
+cat .git/ORIG_HEAD 內容正是進行 reset 指令前的 SHA-1 值
+
+【用rebase 修改歷史訊息】
+git rebase -i bb0c9c2 參數-i是指要進入 Rebase 指令的「互動模式」，
+應用範圍會「從現在到 bb0c9c2 這個 Commit
+pick：「保留這次的 Commit，不做修改」
+pick 改成 reword：欲修改這幾個 Commit 的訊息
+存檔並離開之後，立馬就會再跳另幾個 Vim 編輯器畫面，
+再一一把內容編輯成需要修改的樣子。
+並不是只有單純的改字，Commit 的 SHA-1 值都變了，根本就是全新的 Commit 物件了。
+在它之後的 Commit 因為前面的歷史改了，所以後面整串的 Commit 全部都重新做出新的 Commit 出來替代舊的 Commit。
+
+【用rebase 把多個 Commit 合併成一個 Commit】
+git rebase -i bb0c9c2 使用互動模式的 Rebase 來處理
+把pick 2bab3e7 add dog 1 改成 squash 27f6ed6 add dog 2
+會把該commit(2bab3e7) 合併到前一個 commit
+存檔並離開 Vim 編輯器後，它會開始進行 Rebase
+在 Squash 的過程中，它還會跳出 Vim 編輯器讓你編輯一下訊息，幾組squash就跳幾次
+
+【用rebase 把一個 Commit 拆解成多個 Commit】
+git rebase -i bb0c9c2 使用互動模式的 Rebase 來處理
+跳出 Vim 編輯器，把要拆的那個 Commit 的 pick 改成 edit
+Rebase 在執行到該 Commit 的時候就會停下來
+git reset HEAD^ 把該 Commit 拆成兩個 Commit
+可以看到該commit的檔案都被拆出來放在工作目錄，並且是處於 Untracked 狀態
+依序add並commit加上訊息後，還是處於 Rebase 狀態
+git rebase --continue 所以要讓 Rebase 繼續跑完
+
+【用rebase 在某些 Commit 之間再加新的 Commit】
+git rebase -i bb0c9c2 使用互動模式的 Rebase 來處理
+跳出 Vim 編輯器，把要加在那個 Commit 之後的該 pick 改成 edit
+Rebase 在執行到該 Commit 的時候就會停下來
+加上所需的幾個 Commit 後
+git rebase --continue 就繼續剛剛中斷的 Rebase
+
+【用rebase 調整 Commit 順序】 注意相依性問題
+git rebase -i bb0c9c2 使用互動模式的 Rebase 來處理
+跳出 Vim 編輯器，直接移動commit順序後，存檔、離開 :wq，Rebase 就會做它的工作
+
+【用rebase 刪除commit】 注意相依性問題
+git rebase -i bb0c9c2 使用互動模式的 Rebase 來處
+跳出 Vim 編輯器，把要拆的那個 Commit 的 pick 改成 drop
+存檔、離開後便開始進行 Rebase 指令
+
+
+【cherry-pick：撿別的分支的 Commit 過來合併】
+git cherry-pick 6a498ec 複製該 Commit 的內容過來
+原本在該分支的 Commit 還是在原來的地方
+git cherry-pick fd23e1c 6a498ec f4f4442 一次撿好幾個Commit 過來合併
+git cherry-pick 6a498ec --no-commit 撿過來的 Commit 不會直接合併，而是會先放在暫存區
+
+
+
+【Revert】 再做一個新的 Commit，來取消你不要的 Commit
+比較適用於已經推出去的 Commit，
+或是不允許使用 Reset 或 Rebase 之修改歷史紀錄的指令的場合
+git revert HEAD --no-edit 參數--no-edit表示不編輯 Commit 訊息
+git revert HEAD --no-edit 再Revert來取消 Revert，又多一個Commit
+git reset HEAD^ --hard 直接前往 Revert 之前的commit版本號，
+
+
+【標籤（tag）】 貼在某個 Commit 上的東西，不會移動
+輕量標籤（lightweight tag）：僅是一個指向某個 Commit 的指標，沒有含有其它的資訊
+適合用來個人使用或是暫時標記用途
+git tag cats123 把標籤貼在目前所在的這個 Commit 上
+git tag cats123 51d54ff 這個 Commit（51d54ff）打上一個 cats123 的標籤
+有附註標籤（annotated tag）：有附註的標籤，Git比較推薦使用
+可以清楚的看得出來是誰在什麼時候打了這張標籤
+git tag cats123 51d54ff -a -m "Big Cats are comming"  參數-a就是請 Git 幫你建立有附註的標籤
+跟分支一樣都是以檔案方式存在 .git/refs/tags 目錄下
+檔案的內容也跟分支一樣，是一個 40 個字元的 SHA-1 值，指向某個地方。
+輕量標籤指向的是某一個 Commit，
+附註標籤是指向某個 Tag 物件，而這個 Tag 物件才再指向那個 Commit。
+git tag -d cats123 刪除只要給它 -d 參數
+
+【stash】
+git stash 將修改先「存」起來
+git stash -u 使用 -u 參數，因為Untracked 狀態的檔案預設沒辦法被 Stash
+git stash list 輸出 Stash 列表
+例如輸出：stash@{0}: WIP on btest: b565b6b 新增bird1
+可以放很多份 Stash，stash@{0} 會變成 stash@{1}，以此類推
+git stash pop 使用pop，把 stash@{0} 拿出來並套用在目前的分支上
+git stash pop stash@{2} 指定要 pop stash@{2}
+用pop 套用成功之後，那個套用過的 Stash 就會被刪除。
+git stash drop 把那個 stash@{0} 從列表裡刪掉
+git stash drop stash@{2} 指定要刪掉 stash@{2}
+git stash apply 把 stash@{0} 這個 Stash 拿來套用在現在的分支上
+git stash apply stash@{2} 指定要套用 stash@{2}
+用apply 套用成功之後，Stash 不會刪除，還是會留在 Stash 列表上
+
+
+【縮寫】
+git config --global alias.st status 縮寫，git st 就有 git status 的效果
+git config --global alias.ls 'log --graph --pretty=format:"%h <%an> %ar %s"'
+縮寫，格式複雜，包含 Commit 的：版本號、user名、時間、版本註釋
+也可以到 ~/.gitconfig 裡的[alias]修改
+
+【修改最後一次的 Commit ，將產生新的hash版本號】
+git commit --amend -m "Welcome" 修改最後一次的 Commit 訊息
+git commit --amend --no-edit 追加檔案到最近一次的 Commit，--no-edit 指「我不要編輯 Commit 訊息」
+因為 Commit 的內容改變了，所以 Git 會重新計算並產生一顆新的 Commit 物件，
+也就是這其實是一次全新的 Commit（只是看起來不像新的），產生新的hash版本號
+
+【.gitignore 忽略】
+只對在設定 .gitignore 之後才有效，可用git rm --cached 請出 git
+即使這個檔案沒被 Commit 或是沒被 Push 上 Git Server 都會有效
+git add -f aa.txt 忽略這個忽略的規則
+git clean -fX 一口氣清除已忽略檔案，-f 參數是指強制刪除
+
+【filter-branch】
+git filter-branch --tree-filter "rm -f Note.txt"
+filter-branch 這個指令可以讓你根據不同的 filter，一個一個 Commit 的來處理它
+--tree-filter 這個 filter 可以讓你在 Checkout 到每個 Commit 的時候執行你指定的指令，執行完後再自動幫你重新再 Commit。
+rm -f Note.txt 強制刪除 Note.txt 檔案
+因為刪除了某個檔案，所以在那之後的 Commit 全部都會重新計算，也就是說等於產生一份新的歷史紀錄了
+git reset refs/original/refs/heads/master --hard 回復執行filter-branch前狀態
+之前的狀態備份一份在 .git/refs/original/refs/heads 這個目錄裡
+（裡面是開始進行 filter-branch 之前的那個 HEAD 的 SHA-1 值）
+全部刪乾淨：
+git filter-branch -f --tree-filter "rm -f Note.txt" 參數-f 強制覆寫 filter-branch 的備份點
+rm .git/refs/original/refs/heads/master 資源回收有關的要刪掉
+git reflog expire --all --expire=now 還有Reflog也要清，要求 Reflog 現在立刻過期
+git fsck 檢查倉庫的資料完整性，可以看到很多 Unreachable 的物件
+git gc --prune=now 最後啟動 Git 的資源回收機制，立刻清除
+可以再檢查一下：
+git fsck
+git reset 27f6ed6 --hard
+
+
+【Git Flow】
+Master 分支
+主要是用來放穩定、隨時可上線的版本。
+這個分支的來源只能從別的分支合併過來，開發者不會直接 Commit 到這個分支。
+因為是穩定版本，所以通常也會在這個分支上的 Commit 上打上版本號標籤。
+Develop 分支
+這個分支主要是所有開發的基礎分支。
+當要新增功能的時候，所有的 Feature 分支都是從這個分支切出去的。
+而 Feature 分支的功能完成後，也都會合併回來這個分支。
+Hotfix 分支
+當線上產品發生緊急問題的時候，會從 Master 分支開一個 Hotfix 分支出來進行修復。
+Hotfix 分支修復完成之後，會合併回 Master 分支，也同時會合併一份到 Develop 分支。
+如果不合併回 Develop 分支，等到時候 Develop 分支完成並且合併回 Master 分支的時候，那個問題就又再次出現了。
+而 Develop 分支的功能可能尚在開發中，這時候硬是要從這裡切出去修再合併回 Master 分支，只會造成更大的災難。
+Release 分支
+當認為 Develop 分支夠成熟了，就可以把 Develop 分支合併到 Release 分支。
+在這邊進行算是上線前的最後測試。
+測試完成後，Release 分支將會同時合併到 Master 以及 Develop 這兩個分支上。
+Master 分支是上線版本。
+而合併回 Develop 分支的目的，是因為可能在 Release 分支上還會測到並修正一些問題，所以需要跟 Develop 分支同步，免得之後的版本又再度出現同樣的問題。
+Feature 分支
+當要開始新增功能的時候，就是使用 Feature 分支的時候了。
+Feature 分支都是從 Develop 分支來的，完成之後會再併回 Develop 分支。
+
+
+
+
+
+【GitHub】
+1. 照著網站說明：
+echo "# practice" >> README.md 在電腦找一個空的目錄，先建立一個 README.md 檔案
+git init
+git add README.md
+git commit -m "first commit"
+2. 設定好遠端節點：
+git remote add origin https://github.com/LMingSS/practice.git
+	add 指要加入一個遠端的節點
+	origin 是一個「代名詞」，指的是後面那串 GitHub 伺服器的位置
+3. 接下來要把東西推上遠端的 Git 伺服器：
+git push -u origin master （等同於 git push origin master:master）
+	把 master 這個分支的內容，推向 origin 這個位置
+	在 origin 那個遠端 Server 上，如果 master 不存在，就建立一個叫做 master 的同名分支
+	但如果本來 Server 上就存在 master 分支，便會移動 Server 上 master 分支的位置，使它指到目前最新的進度上
+	參數 -u 設定 upstream
+git push origin master:cat 把本地端的 master 分支推上去，在線上建立建立（或更新進度）一個 cat 分支
+git push dragon cat 把cat分支推上dragon這個遠端節點所代表的位置
+*upstream 會是遠端 Server 上的某個分支
+在Git裡，每個分支可以設定一個upstream，它會指向並追蹤（track）某個分支
+通常 upstream 會是遠端 Server 上的某個分支，但其實要設定在本地端的其它分支也可以。
+git push -u origin master 會把origin/master設定為本地 master 分支的 upstream
+下回執行 git push 指令而不加任何參數的時候，
+就會推往 origin 這個遠端節點，並且把 master 這個分支推上去
+沒有參數 -u 設定 upstream，就必須在每次 Push 的時候都跟 Git 講清楚、說明白
+git fetch 取得遠端資料庫
+git merge 使用快轉模式（Fast Forward）方式進行合併
+git pull 等於同時使用 git fetch + git merge
+git push origin :cat 用 Push 指令來刪除遠端分支，就像是推了空的內容去更新線上的 cat 分支的內容
+
+
+【推不上去】
+先拉再推
+git pull --rebase 內容抓下來之後，使用 Rebase 方式合併
+git pull 一般的合併方式，如果沒發生衝突就可以順利
+git push -f 或是--force，強迫硬推上去，把別人之前的內容蓋掉
+用在整理歷史紀錄、只用在自己身上，GitHub 網站有提供保護機制
+其它有之前進度的隊友再次進行 git push -f 指令一次，
+把正確的內容強迫推上去，蓋掉前一次的 git push -f 所造成的災難，才救得回來
+
+【clone 從伺服器上取得 Repository】
+git clone git@github.com:line/line-bot-sdk-python.git
+git clone git@github.com:line/line-bot-sdk-python.git banana 存成不同的目錄名稱
+Clone 指令會把整個專案的內容複製一份到你的電腦裡，不只有檔案，
+所有整個專案的歷史紀錄、分支、標籤等內容都會複製一份下來。
+Clone 指令通常只會使用第一次，Clone 之後的更新，就是 Pull/Fetch 了。
+
+【與其它開發者的互動】 使用 Pull Request（PR）
+第一步：Fork 專案：複製一份到你的帳號
+第二步：Clone 回來修改：git clone HTTPS/SSH
+第三步：Push 回你自己的專案
+第四步：發 PR 給原作者：按「Create pull request」後，填寫 PR 的相關資訊
+【跟上游同步】
+第一步：設定原作的遠端節點
+git remote -v 查詢遠端數據庫更完整的資訊
+可以看到 Fork 過來的專案：
+origin	https://github...自己 (fetch)
+origin	https://github...自己 (push)
+git remote add dummy https://github...原作 使用 dummy 做為指向原作的遠端節點
+之後，再使用 git remote -v 可以看到：
+dummy	https://github...原作 (fetch)
+dummy	https://github...原作 (push)
+origin	https://github...自己 (fetch)
+origin	https://github...自己 (push)
+第二步：抓取原作專案的內容
+git fetch dummy 使用 Fetch 指令來取得原作專案最新版的內容
+git merge dummy/master 跟上剛抓下來的這些進度，或用 Rebase 也可
+第三步：推回自己的專案
+在電腦上已經是最新版本了，
+如果你希望你在 GitHub 上那個 Fork 的專案也跟到最新版，只要推上去就行了
+git push origin master
+
+【製作更新檔】
+git format-patch a808659 從 a808659 這個 Commit 之後（不包括本身）的更新檔
+git format-patch -2 產生最新的兩次 Commit 的更新檔
+git format-patch -2 -o /tmp/patches 加上 -o 參數可以指定產生的更新檔的位置
+git am /tmp/patches/* 一次把該目錄的更新檔全部用上，會依據檔案的名字依序一個一個套用
+
+
+
+【使用 GitHub 免費製作個人網站】
+1. 僅呈現靜態頁面內容
+2. 不支援 .htaccess 之類的設定檔，所以無法設定使用者密碼。
+3. 僅能使用 Git 上傳
+4. 所有的 GitHub Pages 都是公開的，甚至放在 Private 專案裡，頁面也是公開的。
+在 GitHub 上開一個全新的專案，名稱填寫「username.github.io」，username = 自己 GitHub 帳號的小寫
+建立 index.html 並推上去，輸入網址 https://username.github.io/ 便可連上頁面
+
+
+
+【Git 的物件：blob、tree、commit 和 tag】
+Blob 物件（Binary large object）
+git add 將檔案加至暫存區後，會建立一個 Blob 物件，並根據物件的內容計算出 SHA-1 值。
+Blob 物件的檔名由 SHA-1 演算法決定；Blob 的內容則是壓縮演算法決定。
+echo 'hello world!' | git hash-object -w --stdin 計算這個 Blob 物件的 SHA-1 值
+輸出得：a0423896973644771497bdc03eb99d5281615b51
+-w 將物件加入 .git/objects 目錄內，並輸出相對應的 SHA-1 值
+--stdin 從 stdin 讀取內容，或在指令後面加上指定的檔案路徑
+a0為子目錄，4238...15b51為檔名，
+檔案內容為 Git 壓縮演算法後，將內容壓縮之後的結果。
+
+Tree 物件：存檔名、資料夾名稱、檔案權限的物件
+
+Commit：
+擁有 SHA1 檔名，儲存在 .git/objects 目錄下
+Commit 只能紀錄 Tree，不能紀錄 Blob
+git cat-file -p [Commit 物件的 40 字元] # 查看物件內容，-t為查看物件型態
+1. 某個 Tree 物件。
+2. parent 表示指向上一次的 Commit
+3. 本次進行 Commit 的時間。
+4. 作者跟進行這次 Commit 的人
+5. 本次 Commit 的訊息
+
+Commit、Tree、Blob 都是存在 .git/objects 裡面，以 SHA1 當檔名的二進制檔案！
+
+Tag
+Tag 物件不會在我們執行 Commit 的過程中產出，而是需要透過我們手動把 Tag 貼在某個 Commit 上。
+git tag -a [Tag名稱] -m"紀錄訊息" 參數-a為新增附註標籤之意
+Tag 回饋訊息一樣包含了作者名稱、新增的日期、Tag 標籤名稱，以及當時紀錄的訊息。
+Tag 物件並不是以 SHA-1 當檔名的二進制檔案，
+而是紀錄著「Commit」的 SHA-1，並儲存在 .git/refs 裡面。
+
+
+git add：建立 Tree、Blob 物件。為提交時做準備。
+	將檔案內容轉成 Blob 物件。目錄、檔名以 Tree 物件儲存。
+	Tree 物件指向 Blob 物件或是其他的 Tree 物件。
+git commit：建立一個 Commit 的檔案儲存在 .git/objects。
+	Commit 會指向一個 Tree 物件
+	除了第一個新增的 Commit 外，其餘 Commit 都會指向前一個 Commit 。
+git tag：建立 Tag 檔案（Snnotated Tag）
+	紀錄某個 Commit 的 SHA-1 值，並儲存在 .git/refs。
+	Tag 物件指向某個 Commit 物件
+
+
+【vim】
+Normal 模式，又稱命令模式，無法輸入文字，僅能進行複製、貼上、存檔或離開動作
+:w 會進行存檔，:q 會關閉這個檔案（但若未存檔會提示先存檔再離開），
+:wq 存檔完成後直接關閉這個檔案。
+i、a 或 o 這三個鍵其中一個進入 Insert 模式
+i: insert，a: append，o：會新增一行並開始輸入
+按下 ESC 鍵或是 Ctrl + [ 組合鍵，可退回至 Normal 模式
+
+【linux】
+ls: list
+-l: 顯示檔案與目錄的詳細資訊
+-a: 顯示隱藏的檔案與目錄
+-h: 易讀的格式輸出
+-r: 反向排序顯示
+-R: 靠遞迴的方式列出所有子目錄的檔案
+-lt: 依照時間排序，讓最新的檔案排在前面
+-lS: 依照檔案的大小來排序
+-d: 只列出目錄
+
+第一屬性代表這個檔案是『目錄、檔案或連結檔』：
+[d]是目錄；[-]是檔案；[l]為連結檔 (link file)；
+[b]表示為裝置檔裡面的可供儲存的周邊設備，例如硬碟；
+[c]表示為裝置檔裡面的序列埠設備，例如鍵盤、滑鼠。
+三個為一組，且均為『rwx』的三個參數的組合。其中，
+[r]可讀、[w]可寫、[x]可執行、[-]無該權限：
+『擁有人的權限』；『同群組的權限』；『其他非本群組的權限』。
+目錄光有可讀權限[r]並無法存取目錄。
+第二欄表示為連結佔用的節點 (i-node)
+第三欄表示這個檔案（或目錄）的『擁有人』
+第四欄表示擁有人的群組

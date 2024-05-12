@@ -1,0 +1,15 @@
+
+開啟 prompt 到 cd 資料夾，
+
+set FLASK_APP=hello.py
+
+flask run --reload
+
+
+
+另開 cmd 切換到程式所在資料夾，ngrok.exe 也要在該資料夾。
+建立 ngrok 伺服器，輸入：
+
+ngrok http 埠位號碼（Flask預設為5000）
+
+將出現的 Forwarding 網址填入 Webhook URL，
