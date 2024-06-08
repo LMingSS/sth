@@ -1,0 +1,114 @@
+body {
+    background: linear-gradient(180deg, #C1E1FF 0%, #0085FF 100%);
+    min-height: 100vh;
+    font-family: "Inter", sans-serif;
+}
+
+.container{
+    background-color: rgb(197, 230, 213);
+    width: 400px;
+    margin: 100px auto;
+    /* margin: 上下邊界 ，auto：左右置中*/
+    border-radius: 30px;
+    /* border-radius: 圓角*/
+    padding: 10px 100px;
+    /* padding：上下左右空的距離 */
+}
+
+.todo-list-title{
+    position: relative;
+    left: -20px;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.inner-wrapper {
+    margin: 0 auto;
+    max-width: 350px;
+    width: 100%;
+    /* background-color: red; */
+}
+
+.input-wrapper {
+    border-radius: 20px;
+    background: #EEEFF0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 424px;
+}
+
+
+.input-wrapper input {
+    background-color: transparent;
+    border: 0px;
+    flex: 1;
+    outline: none; /*不要有邊框*/
+    padding: 10px 20px;
+}
+
+
+.input-wrapper button{
+    background-color: #359AFF; /*按鈕背景顏色*/
+    border: 0px; /*不要有邊框*/
+    color: #EEEFF0; /*字體顏色*/
+    font-family: "Inter", sans-serif; /*字體*/
+    font-size: 14px; /*字體大小*/
+    padding: 10px 13px; /*上下 左右*/
+    border-radius: 20px; /*圓角*/
+    cursor: pointer; /*滑鼠指標變成手指*/
+    font-weight: 700; /*字體粗細*/
+}
+
+.list{
+    list-style: none; /*清除項目符號*/
+    padding: 0px; /*清除上下padding*/
+}
+
+.list li{
+    vertical-align: middle; /*垂直置中*/
+    font-weight: 400; /*字體粗細*/
+    padding: 10px; /*上下padding*/
+    position: relative; /*相對位置*/
+}
+
+.list li.checked{
+    text-decoration: line-through; /*出現刪除線*/
+}
+
+.list li::before{ /*標記符號 before*/
+    content: "";
+    display: inline-block; /*內容置中*/
+    width: 24px;
+    height: 24px;
+    background-image: url(assets/unchecked.svg); /*圖片*/
+    background-size: contain; 
+    background-repeat: no-repeat;
+    cursor: pointer; /*滑鼠指標變成手指*/
+    vertical-align: middle; /*垂直置中*/
+    margin-right: 10px; /*右邊距：距離文字塊*/
+}
+
+.list li.checked::before{
+    background-image: url(assets/checked.svg);
+}
+
+.delete{
+    background-image: url(assets/delete.svg);
+    border-radius: 25px;
+    padding: 5px;
+    background-position: center; /*圖片置中*/
+    object-fit: cover; /*圖片不變形*/
+    /* cursor: pointer; 滑鼠指標變成手指 */
+    position: absolute;
+    background-repeat: no-repeat;
+    right: 0;
+    /* top: 0; */
+    width: 20px;
+    height: 20px;
+}
+
+.delete:hover{ /*滑鼠滑入時變色*/
+    background-color: #EEEFF0;
+    cursor: pointer;
+}

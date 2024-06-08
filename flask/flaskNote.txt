@@ -13,3 +13,4 @@ flask run --reload
 ngrok http 埠位號碼（Flask預設為5000）
 
 將出現的 Forwarding 網址填入 Webhook URL，
+記得要加上 "/callback" 在後面。
